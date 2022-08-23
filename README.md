@@ -26,6 +26,8 @@ If "Add all children" is checked, dropping a slot into the drop target will add 
 - ### Slot name
   - Name of parent slot if element is a slot
   - Name of the slot that the component is under if element is a field
+- ### Slot tag
+  - Tag of the slot that was gathered from above
 - ### Current value/Element name
   - Value of the field (eg. int for fields that hold integers, slot name for fields that hold slots)
   - Empty for anything else that is not a field
@@ -33,5 +35,9 @@ If "Add all children" is checked, dropping a slot into the drop target will add 
   - Slot name of the value (eg. name of the slot that holds the material)
   - Name of parent if field holds a slot reference
   - Empty for anything else that is not a field
+- ### Current value slot tag
+  - Tag of the slot that was gathered from above
 - ### Target slot name
-  - Slot name of where the dyn vars will be created
+  - Slot name of where the dyn vars will be created (either on each element's slot, or specified slot)
+- ### Target slot tag
+  - Tag of the target slot
