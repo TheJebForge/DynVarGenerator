@@ -14,7 +14,7 @@ namespace DynVarGenerator
             Engine.Current.RunPostInit(
                 () => DevCreateNewForm.AddAction(
                     "Editor", 
-                    "DynVar Generator", 
+                    "DynVar Generator (Mod)", 
                     x => new Wizard(x)));
         }
     }

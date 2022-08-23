@@ -21,6 +21,7 @@ namespace DynVarGenerator
         ReferenceField<IWorldElement> _newField;
         ReferenceMultiplexer<IWorldElement> _fields;
         public ValueField<int> DynVarMode;
+        public ValueField<int> DynVarPlacementMode;
         public ReferenceField<Slot> DynVarSlot;
 
         public Wizard(Slot slot) {
@@ -37,6 +38,10 @@ namespace DynVarGenerator
 
             _fields = data.AttachComponent<ReferenceMultiplexer<IWorldElement>>();
             DynVarMode = data.AttachComponent<ValueField<int>>();
+            
+            DynVarPlacementMode = data.AttachComponent<ValueField<int>>();
+            DynVarPlacementMode.Value.Value = 1;
+            
             DynVarSlot = data.AttachComponent<ReferenceField<Slot>>();
         }
 
@@ -47,8 +52,8 @@ namespace DynVarGenerator
             _canvasPanel = _wizardRoot.AttachComponent<NeosCanvasPanel>();
             _canvasPanel.Panel.AddCloseButton();
             _canvasPanel.Panel.AddParentButton();
-            _canvasPanel.Panel.Title = "DynVar Generator";
-            _canvasPanel.Canvas.Size.Value = new float2(1000f, 1000f);
+            _canvasPanel.Panel.Title = "DynVar Generator (Mod)";
+            _canvasPanel.Canvas.Size.Value = new float2(1000f, 1100f);
 
             PrepareDataVariables();
             PrepareInterface();
@@ -64,7 +69,7 @@ namespace DynVarGenerator
 
             ui.NestInto(ui.Empty("Split"));
             {
-                ui.SplitHorizontally(0.6f, out RectTransform left, out RectTransform right);
+                ui.SplitHorizontally(0.55f, out RectTransform left, out RectTransform right);
 
                 left.OffsetMax.Value = new float2(-2f);
                 right.OffsetMin.Value = new float2(2f);
@@ -102,6 +107,9 @@ namespace DynVarGenerator
 
                     ui.VerticalLayout(4f).VerticalAlign.Value = LayoutVerticalAlignment.Top;
                     {
+                        ui.Text("Operations").AutoSizeMax.Value = 20;
+                        ui.Button("Clear List").LocalPressed += (button, data) => _fields.References.Clear();
+                        ui.Empty("Gap");
                         _wizardSettings.BuildSettings(ui);
                         ui.Style.FlexibleHeight = 1;
                         ui.Empty("Gap");
@@ -152,7 +160,7 @@ namespace DynVarGenerator
             }
         }
 
-        string FormatDynVarName(IWorldElement element, Slot targetSlot) {
+        string FormatName(string format, IWorldElement element, Slot targetSlot) {
             string elementName = element.Name;
 
             if (element.Parent is ISyncList parentList) {
@@ -170,14 +178,17 @@ namespace DynVarGenerator
             
             Slot elementSlot = element.FindNearestParent<Slot>();
             
-            string curValueName = "null";
-            string curValueSlotName = "null";
+            string curValueName = "";
+            string curValueSlotName = "";
+            string curValueSlotTag = "";
             
             switch (element) {
                 case ISyncRef syncRef:
                     if (syncRef.Target != null) {
                         curValueName = syncRef.Target.Name;
-                        curValueSlotName = syncRef.FindNearestParent<Slot>().Name;
+                        Slot valueSlot = syncRef.FindNearestParent<Slot>();
+                        curValueSlotName = valueSlot.Name;
+                        curValueSlotTag = valueSlot.Tag;
                     }
                     break;
                 case IField field:
@@ -186,13 +197,25 @@ namespace DynVarGenerator
             }
 
             return string.Format(
-                _wizardSettings.DynVarNameFormat,
+                format,
                 elementName,
                 elementSlot.Name,
+                elementSlot.Tag,
                 curValueName,
                 curValueSlotName,
-                targetSlot.Name);
+                curValueSlotTag,
+                targetSlot.Name,
+                targetSlot.Tag);
         }
+
+        void CreateDynVarSpace(IWorldElement element, Slot targetSlot) {
+            if (targetSlot.GetComponent<DynamicVariableSpace>() != null) return;
+            
+            DynamicVariableSpace space = targetSlot.AttachComponent<DynamicVariableSpace>();
+            space.SpaceName.Value = FormatName(_wizardSettings.DynVarSpaceNameFormat, element, targetSlot);
+            space.OnlyDirectBinding.Value = _wizardSettings.OnlyDirectBinding;
+        }
+        
         bool CreateDynField(IWorldElement element, Slot targetSlot) {
             switch (element) {
                 case ISyncRef syncRef:
@@ -215,13 +238,15 @@ namespace DynVarGenerator
 
         public void AttachDynRefField<T>(ISyncRef element, Slot targetSlot) where T : class, IWorldElement {
             DynamicReference<T> dynVar = targetSlot.AttachComponent<DynamicReference<T>>();
-            dynVar.VariableName.Value = FormatDynVarName(element, targetSlot);
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
+            dynVar.OverrideOnLink.Value = _wizardSettings.OverrideOnLink;
             dynVar.TargetReference.Target = (SyncRef<T>)element;
         }
         
         public void AttachDynValueField<T>(IField element, Slot targetSlot) {
             DynamicField<T> dynVar = targetSlot.AttachComponent<DynamicField<T>>();
-            dynVar.VariableName.Value = FormatDynVarName(element, targetSlot);
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
+            dynVar.OverrideOnLink.Value = _wizardSettings.OverrideOnLink;
             dynVar.TargetField.Target = (IField<T>)element;
         }
 
@@ -249,13 +274,15 @@ namespace DynVarGenerator
 
         public void AttachDynRefVar<T>(IWorldElement value, Slot targetSlot) where T : class, IWorldElement {
             DynamicReferenceVariable<T> dynVar = targetSlot.AttachComponent<DynamicReferenceVariable<T>>();
-            dynVar.VariableName.Value = FormatDynVarName(value, targetSlot);
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, value, targetSlot);
+            dynVar.OverrideOnLink.Value = _wizardSettings.OverrideOnLink;
             dynVar.Reference.Target = (T)value;
         }
         
         public void AttachDynValueVar<T>(IField field, Slot targetSlot) {
             DynamicValueVariable<T> dynVar = targetSlot.AttachComponent<DynamicValueVariable<T>>();
-            dynVar.VariableName.Value = FormatDynVarName(field, targetSlot);
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, field, targetSlot);
+            dynVar.OverrideOnLink.Value = _wizardSettings.OverrideOnLink;
             dynVar.Value.Value = (T)field.BoxedValue;
         }
 
@@ -280,7 +307,7 @@ namespace DynVarGenerator
         
         public void AttachDynRefDriver<T>(ISyncRef element, Slot targetSlot) where T : class, IWorldElement {
             DynamicReferenceVariableDriver<T> dynVar = targetSlot.AttachComponent<DynamicReferenceVariableDriver<T>>();
-            dynVar.VariableName.Value = FormatDynVarName(element, targetSlot);
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
 
             if (_wizardSettings.SetCurrentValueAsDefault)
                 dynVar.DefaultTarget.Target = (T)element.Target;
@@ -290,7 +317,7 @@ namespace DynVarGenerator
         
         public void AttachDynValueDriver<T>(IField element, Slot targetSlot) {
             DynamicValueVariableDriver<T> dynVar = targetSlot.AttachComponent<DynamicValueVariableDriver<T>>();
-            dynVar.VariableName.Value = FormatDynVarName(element, targetSlot);
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
 
             if (_wizardSettings.SetCurrentValueAsDefault)
                 dynVar.DefaultValue.Value = (T)element.BoxedValue;
@@ -301,25 +328,42 @@ namespace DynVarGenerator
         void CreateDynVars(IButton button, ButtonEventData eventData) {
             Slot targetSlot = DynVarSlot.Reference.Target;
 
-            if (targetSlot != null) {
+            if (targetSlot != null || DynVarPlacementMode.Value.Value == 0) {
                 int mode = DynVarMode.Value.Value;
                 int countProcessed = 0;
 
                 foreach (IWorldElement element in _fields.References) {
-                    if (mode < 2) {
-                        if (mode == 0 && CreateDynField(element, targetSlot)) {
-                            countProcessed++;
+                    Slot whereToCreate = targetSlot;
+
+                    if (DynVarPlacementMode.Value.Value == 0) {
+                        if (element is Slot slot) {
+                            whereToCreate = slot;
                         }
                         else {
-                            CreateDynVar(element, targetSlot);
-                            countProcessed++;
+                            whereToCreate = element.FindNearestParent<Slot>();
                         }
                     }
-                    else {
-                        if (CreateDynDriver(element, targetSlot)) {
-                            countProcessed++;
-                        }
+
+                    if (_wizardSettings.DynamicVariableSpaces) {
+                        CreateDynVarSpace(element, whereToCreate);
                     }
+
+                    try {
+                        if (mode < 2) {
+                            if (mode == 0 && CreateDynField(element, whereToCreate)) {
+                                countProcessed++;
+                            }
+                            else {
+                                CreateDynVar(element, whereToCreate);
+                                countProcessed++;
+                            }
+                        }
+                        else {
+                            if (CreateDynDriver(element, whereToCreate)) {
+                                countProcessed++;
+                            }
+                        }
+                    } catch(ArgumentException) {}
                 }
 
                 button.LabelText = $"Done! Processed: {countProcessed}";
