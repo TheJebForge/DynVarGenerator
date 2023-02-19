@@ -251,18 +251,31 @@ namespace DynVarGenerator
         }
 
         void CreateDynVar(IWorldElement element, Slot targetSlot) {
-            NeosMod.Msg(element.GetType());
-
             switch (element) {
                 case ISyncRef syncRef:
                     GetType().GetMethod("AttachDynRefVar")
-                        ?.MakeGenericMethod(syncRef.TargetType)
-                        .Invoke(this, new object[] { syncRef.Target, targetSlot });
+                        ?.MakeGenericMethod(
+                            _wizardSettings.ReferenceFieldInstead ? syncRef.GetType() : syncRef.TargetType
+                        ).Invoke(this, new object[]
+                        {
+                            _wizardSettings.ReferenceFieldInstead ? syncRef : syncRef.Target, 
+                            targetSlot
+                        });
                     break;
                 case IField field:
-                    GetType().GetMethod("AttachDynValueVar")
-                        ?.MakeGenericMethod(field.ValueType)
-                        .Invoke(this, new object[] { field, targetSlot });
+                    if (_wizardSettings.ReferenceFieldInstead)
+                    {
+                        GetType().GetMethod("AttachDynRefVar")
+                            ?.MakeGenericMethod(typeof(IField<>).MakeGenericType(field.ValueType))
+                            .Invoke(this, new object[] { field, targetSlot });
+                    }
+                    else
+                    {
+                        GetType().GetMethod("AttachDynValueVar")
+                            ?.MakeGenericMethod(
+                                field.ValueType
+                            ).Invoke(this, new object[] { field, targetSlot });
+                    }
                     break;
                 default:
                     GetType().GetMethod("AttachDynRefVar")
@@ -325,6 +338,47 @@ namespace DynVarGenerator
             dynVar.Target.Target = (IField<T>)element;
         }
         
+        bool CreateDynDrivenValueCopy(IWorldElement element, Slot targetSlot) {
+            switch (element) {
+                case ISyncRef syncRef:
+                    GetType().GetMethod("AttachDynDrivenRefCopy")
+                        ?.MakeGenericMethod(syncRef.TargetType)
+                        .Invoke(this, new object[] { syncRef, targetSlot });
+                    break;
+                case IField field:
+                    GetType().GetMethod("AttachDynDrivenValueCopy")
+                        ?.MakeGenericMethod(field.ValueType)
+                        .Invoke(this, new object[] { field, targetSlot });
+                    break;
+                default:
+                    return false;
+            }
+            
+            return true;
+        } 
+        
+        public void AttachDynDrivenRefCopy<T>(ISyncRef element, Slot targetSlot) 
+            where T : class, IWorldElement
+        {
+            DynamicReferenceVariableDriver<SyncRef<T>> dynVar = targetSlot.AttachComponent<DynamicReferenceVariableDriver<SyncRef<T>>>();
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
+
+            ReferenceCopy<T> refCopy = targetSlot.AttachComponent<ReferenceCopy<T>>();
+            dynVar.Target.Value = refCopy.Source.ReferenceID;
+
+            refCopy.Target.Target = (SyncRef<T>)element;
+        }
+        
+        public void AttachDynDrivenValueCopy<T>(IField element, Slot targetSlot) {
+            DynamicReferenceVariableDriver<IField<T>> dynVar = targetSlot.AttachComponent<DynamicReferenceVariableDriver<IField<T>>>();
+            dynVar.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
+
+            ValueCopy<T> valueCopy = targetSlot.AttachComponent<ValueCopy<T>>();
+            dynVar.Target.Value = valueCopy.Source.ReferenceID;
+
+            valueCopy.Target.Target = (IField<T>)element;
+        }
+        
         void CreateDynVars(IButton button, ButtonEventData eventData) {
             Slot targetSlot = DynVarSlot.Reference.Target;
 
@@ -344,26 +398,44 @@ namespace DynVarGenerator
                         }
                     }
 
+                    if (whereToCreate == null)
+                    {
+                        continue;
+                    }
+
                     if (_wizardSettings.DynamicVariableSpaces) {
                         CreateDynVarSpace(element, whereToCreate);
                     }
 
-                    try {
-                        if (mode < 2) {
-                            if (mode == 0 && CreateDynField(element, whereToCreate)) {
+                    try
+                    {
+                        if (mode < 2)
+                        {
+                            if (mode == 0 && CreateDynField(element, whereToCreate))
+                            {
                                 countProcessed++;
                             }
-                            else {
+                            else
+                            {
                                 CreateDynVar(element, whereToCreate);
                                 countProcessed++;
                             }
                         }
-                        else {
-                            if (CreateDynDriver(element, whereToCreate)) {
-                                countProcessed++;
+                        else
+                        {
+                            switch (mode)
+                            {
+                                case 2 when CreateDynDriver(element, whereToCreate):
+                                case 3 when CreateDynDrivenValueCopy(element, whereToCreate):
+                                    countProcessed++;
+                                    break;
                             }
                         }
-                    } catch(ArgumentException) {}
+                    }
+                    catch (ArgumentException e)
+                    {
+                        NeosMod.Msg(e);
+                    }
                 }
 
                 button.LabelText = $"Done! Processed: {countProcessed}";
