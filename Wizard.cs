@@ -179,6 +179,7 @@ namespace DynVarGenerator
                 case int a when (a >= 65 && a <= 90):
                 case int b when (b >= 97 && b <= 122):
                 case int c when (c == 32 || c == 46 || c == 95):
+                case int d when (d >= 48 && d <= 57):
                     return true;
                 default:
                     return false;
