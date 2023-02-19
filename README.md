@@ -41,6 +41,8 @@ If "Add all children" is checked, dropping a slot into the drop target will add 
   A peculiar mode where DynamicReferenceDriver and RefCopy/ValueCopy is created. So instead of Dynamic Driver driving the field directly, ValueCopy does the driving while Dynamic Reference Driver provides a reference to a field for Source of the Copy 
   <br><br>
   Intended to be used in combination with Dynamic Variables that were created with "Reference the field instead" checked on
+- ### Write Back
+  If write back should be enabled on ValueCopy/ReferenceCopy components that will be generated as part of Dynamically driven ValueCopies 
 
 ## What's the difference between Dynamic Drivers and Dynamically driven Value Copies?
 Dynamic variables frankly always sync, if you're driving a dynamic variable with a local value, this will sync to everyone else too. So if you have a blink blendshape that's driven by a EyeLinearDriver, and that in addition is inside of a Dynamic Field, so you can have the blendshape synced between multiple meshes. EyeLinear has its own timer for every user which is local, so blinks happen in a desynced manner because it's local. But when you force the blendshape to sync between users using a dynamic variable, it makes everyone's blink get synced. So you'll see double blinking if there's 2 users in the session, because their EyeLinearDrivers blink in different phase, but because of dynamic variables, this gets synced between the users.

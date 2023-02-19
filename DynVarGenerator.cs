@@ -7,7 +7,7 @@ namespace DynVarGenerator
     {
         public override string Name => "DynVarGenerator";
         public override string Author => "TheJebForge";
-        public override string Version => "1.2.2";
+        public override string Version => "1.2.3";
 
         public override void OnEngineInit()
         {

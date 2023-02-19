@@ -20,6 +20,7 @@ namespace DynVarGenerator
         public bool OnlyDirectBinding = false;
         public bool ReferenceFieldInstead = false;
         public string DynVarSpaceNameFormat = "";
+        public bool WriteBack = false;
 
         public void BuildSettings(UIBuilder ui) {
             ui.Text("Add Options").AutoSizeMax.Value = 20;
@@ -28,11 +29,12 @@ namespace DynVarGenerator
             ui.Text("DynVar Options").AutoSizeMax.Value = 20;
             ui.ValueRadio("Create Dynamic Fields if possible", _wizard.DynVarMode.Value, 0);
             ui.ValueRadio("Create Dynamic Variables", _wizard.DynVarMode.Value, 1);
-            ui.Checkbox("Reference the field instead", OverrideOnLink).State.OnValueChange += field => ReferenceFieldInstead = field.Value;
+            ui.Checkbox("Reference the field instead", ReferenceFieldInstead).State.OnValueChange += field => ReferenceFieldInstead = field.Value;
             ui.Checkbox("Override On Link", OverrideOnLink).State.OnValueChange += field => OverrideOnLink = field.Value;
             ui.ValueRadio("Create Dynamic Drivers (for fields only)", _wizard.DynVarMode.Value, 2);
             ui.Checkbox("Use current values as default for drivers", SetCurrentValueAsDefault).State.OnValueChange += field => SetCurrentValueAsDefault = field.Value;
             ui.ValueRadio("Create Dynamically driven ValueCopies", _wizard.DynVarMode.Value, 3);
+            ui.Checkbox("Write Back for ValueCopies", WriteBack).State.OnValueChange += field => WriteBack = field.Value;
             ui.Empty("Gap");
             ui.Text("DynVar Name Format").AutoSizeMax.Value = 20;
             ui.TextField(DynVarNameFormat).Text.Content.OnValueChange += field => DynVarNameFormat = field.Value;

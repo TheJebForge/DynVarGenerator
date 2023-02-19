@@ -430,6 +430,7 @@ namespace DynVarGenerator
             dynVar.Target.Value = refCopy.Source.ReferenceID;
 
             refCopy.Target.Target = (SyncRef<T>)element;
+            refCopy.WriteBack.Value = _wizardSettings.WriteBack;
         }
         
         public void AttachDynDrivenValueCopy<T>(IField element, Slot targetSlot) {
@@ -440,6 +441,7 @@ namespace DynVarGenerator
             dynVar.Target.Value = valueCopy.Source.ReferenceID;
 
             valueCopy.Target.Target = (IField<T>)element;
+            valueCopy.WriteBack.Value = _wizardSettings.WriteBack;
         }
         
         void CreateDynVars(IButton button, ButtonEventData eventData) {
