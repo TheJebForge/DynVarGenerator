@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace DynVarGenerator
 {
@@ -15,6 +16,17 @@ namespace DynVarGenerator
 
         readonly Slot _wizardRoot;
         readonly WizardSettings _wizardSettings;
+        
+        readonly Regex _invalidPattern = new Regex(@"[^A-Za-z0-9 ._\/]");
+        readonly Regex _checkForMultipleSlashes = new Regex(@"\/.*\/");
+
+        private readonly Dictionary<char, string> _replacementMap = new Dictionary<char, string>
+        {
+            {'+', "p"},
+            {'/', "."},
+            {'!', "exc"},
+            {'\'', ""}
+        };
 
         NeosCanvasPanel _canvasPanel;
 
@@ -160,6 +172,56 @@ namespace DynVarGenerator
             }
         }
 
+        bool AllowedCharacter(char character)
+        {
+            switch ((int)character)
+            {
+                case int a when (a >= 65 && a <= 90):
+                case int b when (b >= 97 && b <= 122):
+                case int c when (c == 32 || c == 46 || c == 95):
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        
+        string ReplaceForbiddenCharacters(string variableName)
+        {
+            if (_checkForMultipleSlashes.IsMatch(variableName) ||
+                _invalidPattern.IsMatch(variableName))
+            {
+                var result = "";
+                var slashProcessed = false;
+
+                foreach (var character in variableName.ToCharArray())
+                {
+                    if (character == 47)
+                    {
+                        result += slashProcessed ? '.' : '/';
+                        slashProcessed = true;
+                    } else if (AllowedCharacter(character))
+                    {
+                        result += character;
+                    }
+                    else
+                    {
+                        if (_replacementMap.ContainsKey(character))
+                        {
+                            result += _replacementMap[character];
+                        }
+                        else
+                        {
+                            result += '_';
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+            return variableName;
+        }
+
         string FormatName(string format, IWorldElement element, Slot targetSlot) {
             string elementName = element.Name;
 
@@ -196,7 +258,7 @@ namespace DynVarGenerator
                     break;
             }
 
-            return string.Format(
+            return ReplaceForbiddenCharacters(string.Format(
                 format,
                 elementName,
                 elementSlot.Name,
@@ -205,7 +267,7 @@ namespace DynVarGenerator
                 curValueSlotName,
                 curValueSlotTag,
                 targetSlot.Name,
-                targetSlot.Tag);
+                targetSlot.Tag));
         }
 
         void CreateDynVarSpace(IWorldElement element, Slot targetSlot) {
