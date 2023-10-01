@@ -16,7 +16,7 @@ Wizard can be found in DevTool's Create New -> Editor -> DynVar Generator.
 
 Panel on left is list of elements that dynamic vars will be generated for. The drop target accepts any world element. Dropping lists into the target will add all elements of the lists.
 
-You might need [this](https://github.com/EIA485/NeosMoreReferenceProxies) mod to actually be able to grab lists
+You might need [this](https://github.com/TheJebForge/ResoniteMoreReferenceProxies) mod to actually be able to grab lists
 
 If "Add all children" is checked, dropping a slot into the drop target will add all children of the slot as well
 
