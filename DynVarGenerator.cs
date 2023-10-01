@@ -1,13 +1,13 @@
-﻿using NeosModLoader;
-using FrooxEngine;
+﻿using FrooxEngine;
+using ResoniteModLoader;
 
 namespace DynVarGenerator
 {
-    public class DynVarGenerator : NeosMod
+    public class DynVarGenerator : ResoniteMod
     {
         public override string Name => "DynVarGenerator";
         public override string Author => "TheJebForge";
-        public override string Version => "1.2.3";
+        public override string Version => "1.3.0";
 
         public override void OnEngineInit()
         {

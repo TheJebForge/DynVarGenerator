@@ -1,12 +1,10 @@
-﻿using BaseX;
-using FrooxEngine;
+﻿using FrooxEngine;
 using FrooxEngine.UIX;
-using NeosModLoader;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
+using Elements.Core;
+using ResoniteModLoader;
 
 namespace DynVarGenerator
 {
@@ -28,7 +26,7 @@ namespace DynVarGenerator
             {'\'', ""}
         };
 
-        NeosCanvasPanel _canvasPanel;
+        UIBuilder _uiPanel;
 
         ReferenceField<IWorldElement> _newField;
         ReferenceMultiplexer<IWorldElement> _fields;
@@ -61,21 +59,16 @@ namespace DynVarGenerator
             _wizardRoot.Tag = "Developer";
             _wizardRoot.PersistentSelf = false;
 
-            _canvasPanel = _wizardRoot.AttachComponent<NeosCanvasPanel>();
-            _canvasPanel.Panel.AddCloseButton();
-            _canvasPanel.Panel.AddParentButton();
-            _canvasPanel.Panel.Title = "DynVar Generator (Mod)";
-            _canvasPanel.Canvas.Size.Value = new float2(1000f, 1100f);
+            _wizardRoot.LocalScale *= 0.0009f;
+            _uiPanel = RadiantUI_Panel.SetupPanel(_wizardRoot, "DynVar Generator (Mod)".AsLocaleKey(), new float2(1000f, 1200f));
+            RadiantUI_Constants.SetupEditorStyle(_uiPanel);
 
             PrepareDataVariables();
             PrepareInterface();
         }
 
         void PrepareInterface() {
-            Image img = _canvasPanel.Canvas.Slot.AttachComponent<Image>();
-            img.Tint.Value = new color(1f, 0.2f);
-
-            UIBuilder ui = new UIBuilder(_canvasPanel.Canvas);
+            UIBuilder ui = _uiPanel;
             ui.Canvas.MarkDeveloper();
             ui.Canvas.AcceptPhysicalTouch.Value = false;
 
@@ -499,7 +492,7 @@ namespace DynVarGenerator
                     }
                     catch (ArgumentException e)
                     {
-                        NeosMod.Msg(e);
+                        ResoniteMod.Msg(e);
                     }
                 }
 
