@@ -1,11 +1,11 @@
 # DynVar Generator
 
-A [NeosModLoader](https://github.com/zkxs/NeosModLoader) mod for [Neos VR](https://neos.com/) that adds a wizard to quickly generate huge amounts of dynamic fields/variables/drivers for slots, blend shapes, bones or anything else
+A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader) mod for [Resonite](https://resonite.com/) that adds a wizard to quickly generate huge amounts of dynamic fields/variables/drivers for slots, blend shapes, bones or anything else
 
 ## Installation
-1. Install [NeosModLoader](https://github.com/zkxs/NeosModLoader).
+1. Install [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader).
 2. Place [DynVarGenerator.dll](https://github.com/TheJebForge/DynVarGenerator/releases/latest/download/DynVarGenerator.dll) into your `nml_mods` folder. This folder should be at `C:\Program Files (x86)\Steam\steamapps\common\NeosVR\nml_mods` for a default install. You can create it if it's missing, or if you launch the game once with NeosModLoader installed it will create the folder for you.
-3. Start the game. If you want to verify that the mod is working you can check your Neos logs.
+3. Start the game. If you want to verify that the mod is working you can check your Resonite logs.
 
 ## How to use this mod
 Wizard can be found in DevTool's Create New -> Editor -> DynVar Generator. 
