@@ -225,7 +225,7 @@ namespace DynVarGenerator
                 elementName = index.ToString();
 
                 if (parentList.Name.Equals("BlendShapeWeights")) {
-                    ImplementableComponent comp = element.FindNearestParent<ImplementableComponent>();
+                    RenderableComponent comp = element.FindNearestParent<RenderableComponent>();
                     if (comp is SkinnedMeshRenderer renderer) {
                         elementName = renderer.BlendShapeName(index);
                     }
