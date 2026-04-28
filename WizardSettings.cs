@@ -21,6 +21,7 @@ namespace DynVarGenerator
         public bool ReferenceFieldInstead = false;
         public string DynVarSpaceNameFormat = "";
         public bool WriteBack = false;
+        public bool DriveNewDynvar = false;
 
         public void BuildSettings(UIBuilder ui) {
             ui.Text("Add Options").AutoSizeMax.Value = 20;
@@ -33,6 +34,7 @@ namespace DynVarGenerator
             ui.Checkbox("Override On Link", OverrideOnLink).State.OnValueChange += field => OverrideOnLink = field.Value;
             ui.ValueRadio("Create Dynamic Drivers (for fields only)", _wizard.DynVarMode.Value, 2);
             ui.Checkbox("Use current values as default for drivers", SetCurrentValueAsDefault).State.OnValueChange += field => SetCurrentValueAsDefault = field.Value;
+            ui.Checkbox("Move Existing Drivers to new Dynvar", DriveNewDynvar).State.OnValueChange += field => DriveNewDynvar = field.Value;
             ui.ValueRadio("Create Dynamically driven ValueCopies", _wizard.DynVarMode.Value, 3);
             ui.Checkbox("Write Back for ValueCopies", WriteBack).State.OnValueChange += field => WriteBack = field.Value;
             ui.Empty("Gap");
