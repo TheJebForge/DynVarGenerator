@@ -242,7 +242,7 @@ namespace DynVarGenerator
                 case ISyncRef syncRef:
                     if (syncRef.Target != null) {
                         curValueName = syncRef.Target.Name;
-                        Slot valueSlot = syncRef.FindNearestParent<Slot>();
+                        Slot valueSlot = syncRef.Target.FindNearestParent<Slot>();
                         curValueSlotName = valueSlot.Name;
                         curValueSlotTag = valueSlot.Tag;
                     }
@@ -381,6 +381,15 @@ namespace DynVarGenerator
             if (_wizardSettings.SetCurrentValueAsDefault)
                 dynVar.DefaultTarget.Target = (T)element.Target;
 
+            if(element.IsDriven && _wizardSettings.DriveNewDynvar)
+            {
+                DynamicReferenceVariable<T> dynvar_replacement = targetSlot.AttachComponent<DynamicReferenceVariable<T>>();
+                dynvar_replacement.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
+
+                ((RefDrive<T>)element.ActiveLink).Value = dynvar_replacement.Reference;
+
+            }
+
             dynVar.Target.Target = (SyncRef<T>)element;
         }
         
@@ -390,7 +399,16 @@ namespace DynVarGenerator
 
             if (_wizardSettings.SetCurrentValueAsDefault)
                 dynVar.DefaultValue.Value = (T)element.BoxedValue;
-            
+
+            if (element.IsDriven && _wizardSettings.DriveNewDynvar)
+            {
+                DynamicValueVariable<T> dynvar_replacement = targetSlot.AttachComponent<DynamicValueVariable<T>>();
+                dynvar_replacement.VariableName.Value = FormatName(_wizardSettings.DynVarNameFormat, element, targetSlot);
+
+                ((FieldDrive<T>)element.ActiveLink).Value = dynvar_replacement.Value.ReferenceID;
+
+            }
+
             dynVar.Target.Target = (IField<T>)element;
         }
         
