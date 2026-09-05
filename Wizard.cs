@@ -242,7 +242,7 @@ namespace DynVarGenerator
                 case ISyncRef syncRef:
                     if (syncRef.Target != null) {
                         curValueName = syncRef.Target.Name;
-                        Slot valueSlot = syncRef.FindNearestParent<Slot>();
+                        Slot valueSlot = syncRef.Target.FindNearestParent<Slot>();
                         curValueSlotName = valueSlot.Name;
                         curValueSlotTag = valueSlot.Tag;
                     }

@@ -40,7 +40,15 @@ namespace DynVarGenerator
             ui.Empty("Gap");
             ui.Text("DynVar Name Format").AutoSizeMax.Value = 20;
             ui.TextField(DynVarNameFormat).Text.Content.OnValueChange += field => DynVarNameFormat = field.Value;
-            ui.Text("Format help:\n{0} - Element name\n{1} - Slot name\n{2} - Slot tag\n{3} - Current value/Element name\n{4} - Current value slot (for refs only)\n{5} - Current value slot tag (for refs only)\n{6} - Target slot name\n{7} - Target slot tag", alignment: Alignment.MiddleLeft).AutoSizeMax.Value = 20;
+            ui.Text("Format help:\n" +
+                "{0} - Element name\n" +
+                "{1} - Slot name\n" +
+                "{2} - Slot tag\n" +
+                "{3} - Current value/Element name\n" +
+                "{4} - Current value slot (for refs only)\n" +
+                "{5} - Current value slot tag (for refs only)\n" +
+                "{6} - Target slot name\n" +
+                "{7} - Target slot name\n", alignment: Alignment.MiddleLeft).AutoSizeMax.Value = 20;
             ui.Empty("Gap");
             ui.Text("Where to create DynVars").AutoSizeMax.Value = 20;
             ui.ValueRadio("Under each element's slot", _wizard.DynVarPlacementMode.Value, 0);
